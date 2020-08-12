@@ -1,0 +1,26 @@
+taskname,model,category,description
+Autoencoder,autoencoding,2D,Image compression and decompression
+Object Classification,class_object,Semantic,1000-way object classification (via knowledge distillation from ImageNet).
+Scene Classification,class_scene,Semantic,Scene Classification (via knowledge distillation from MIT Places).
+Curvatures,curvature,3D,Magnitude of 3D principal curvatures
+Colorization,colorization,,Colorizing input grayscale images.
+Denoising,denoising,Other,Uncorrupted version of corrupted image.
+Euclidean Depth,depth_euclidean,3D,Depth estimation
+Z-Buffer Depth,depth_zbuffer,3D,Depth estimation.
+Occlusion Edges,edge_occlusion,3D,Edges which include parts of the scene.
+Texture Edges,edge_texture,2D,Edges computed from RGB only (texture edges).
+Egomotion,egomotion,Geometric,Odometry (camera poses) given three input images.
+Camera Pose (Fixated),fixated_pose,Geometric,Relative camera pose with matching optical centers.
+Inpainting,inpainting,2D,Filling in masked center of image.
+Jigsaw,jigsaw,Geometric,Putting scrambled image pieces back together.
+2D Keypoints,keypoints2d,2D,Keypoint estimation from RGB-only (texture features).
+3D Keypoints,keypoints3d,3D,3D Keypoint estimation from underlying scene 3D.
+Camera Pose (Nonfixated),nonfixated_pose,Geometric,Relative camera pose with distinct optical centers.
+Surface Normals,normal,Other,Pixel-wise surface normals.
+Point Matching,point_matching,Geometric,Classifying if centers of two images match or not.
+Reshading,reshading,3D,Reshading with new lighting placed at camera location.
+Room Layout,room_layout,Geometric,Orientation and aspect ratio of cubic room layout.
+Semantic Segmentation,segment_semantic,Semantic,Pixel-wise semantic labeling (via knowledge distillation from MS COCO).
+Unsupervised 2.5D Segmentation,segment_unsup25d,3D,Segmentation (graph cut approximation) on RGB-D-Normals-Curvature image.
+Unsupervised 2D Segmentation,segment_unsup2d,2D,Segmentation (graph cut approximation) on RGB.
+Vanishing Point,vanishing_point,Geometric,Three Manhattan-world vanishing points.
