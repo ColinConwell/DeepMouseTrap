@@ -4,8 +4,7 @@ This is the repository for the ongoing deep neural mouse modeling project, an at
 
 An accompanying Google Colab notebook (bit.ly/Neural-Cheese) contains a brief tutorial on the use of many parts of this code, including the parsing of the neurophysiology data, deep net feature extraction, and deep net modeling of the neurophysiology data.
 
-A manuscript (currently) that uses these methods may be found here:
-
+A manuscript (currently) that uses these methods may be found here: <br>
 0xab.com/papers/conwell-brains-mouse-cnn-2020.pdf
 
 
