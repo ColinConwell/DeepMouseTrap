@@ -39,7 +39,7 @@ def srp_extraction(model_string, feature_maps = None, model_inputs=None, output_
             if isinstance(model_inputs, DataLoader):
                 n_samples = len(model_inputs.dataset)
         if feature_maps is not None:
-            n_samples = next(iter(feature_maps.items())).shape[0]
+            n_samples = next(iter(feature_maps.values())).shape[0]
         n_projections = johnson_lindenstrauss_min_dim(n_samples, eps=eps)
         
     print('Computing {} SRPs for {} on {}...'.format(n_projections, model_string, device_name))
