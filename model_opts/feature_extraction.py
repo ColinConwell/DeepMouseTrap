@@ -175,6 +175,7 @@ def get_all_feature_maps(model, inputs, layers_to_retain=None, use_tqdm = True, 
             start_index += imgs.shape[0]
                     
     if not isinstance(inputs, DataLoader):
+        inputs = inputs.cuda() if next(model.parameters()).is_cuda else inputs
         feature_maps = get_feature_maps(model, inputs, layers_to_retain)
         
     feature_maps = remove_duplicate_feature_maps(feature_maps)
@@ -206,6 +207,7 @@ def get_all_feature_maps_bystack(model, inputs, layers_to_retain=None, use_tqdm 
                     feature_maps[layer] = torch.cat((feature_maps[layer], batch_feature_map[layer]))
     
     if not isinstance(inputs, DataLoader):
+        inputs = inputs.cuda() if next(model.parameters()).is_cuda else inputs
         feature_maps = get_feature_maps(model, inputs)
         
     feature_maps = remove_duplicate_feature_maps(feature_maps)

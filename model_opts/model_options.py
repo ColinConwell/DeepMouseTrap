@@ -45,7 +45,7 @@ def define_taskonomy_options():
         model_name = row['model']
         model_type = 'taskonomy'
         train_type = 'taskonomy'
-        model_string = model_name
+        model_string = model_name + '_' + train_type
         model_call = "instantiate_taskonomy_model('{}')".format(model_name)
         taskonomy_options[model_string] = ({'model_name': model_name, 'model_type': model_type, 
                                         'train_type': train_type, 'call': model_call})
