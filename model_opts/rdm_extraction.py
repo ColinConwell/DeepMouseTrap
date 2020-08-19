@@ -13,14 +13,14 @@ sys.path.append('../model_opts')
 from feature_extraction import *
 from model_options import *
 
-def rdm_extraction(model_string, feature_maps = None, model_inputs = None, output_dir='rdm_arrays', device = 0):
+def rdm_extraction(model_string, feature_maps = None, model_inputs = None, output_dir='rdm_arrays'):
     
     if feature_maps == None and model_inputs == None:
         print('Neither feature maps nor model_inputs are defined.')
     
     model_options = get_model_options()
     model_call = model_options[model_string]['call']
-    device_name = 'CPU' if device is None else torch.cuda.get_device_name(device)
+    device_name = 'CPU' if not torch.cuda.is_available() else torch.cuda.get_device_name()
     print('Computing RDMS for {} on {}...'.format(model_string, device_name))
     
     if not os.path.exists(output_dir):
@@ -34,7 +34,6 @@ def rdm_extraction(model_string, feature_maps = None, model_inputs = None, outpu
         model = eval(model_call)
         model = model.eval()
         if torch.cuda.is_available():
-            torch.cuda.set_device(device)
             model = model.cuda()
         
         if feature_maps is None:

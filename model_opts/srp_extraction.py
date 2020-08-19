@@ -20,7 +20,7 @@ def get_feature_map_filepaths(model_string, feature_map_names, output_dir, subty
     
 
 def srp_extraction(model_string, feature_maps = None, model_inputs=None, output_dir='./srp_arrays', 
-                   n_projections=None, eps=0.1, seed = 1, device = 0):
+                   n_projections=None, eps=0.1, seed = 1):
     
     if feature_maps == None and model_inputs == None:
         raise ValueError('Neither feature_maps nor model_inputs are defined.')
@@ -30,7 +30,7 @@ def srp_extraction(model_string, feature_maps = None, model_inputs=None, output_
     
     model_options = get_model_options()
     model_call = model_options[model_string]['call']
-    device_name = 'CPU' if device is None else torch.cuda.get_device_name(device)
+    device_name = 'CPU' if not torch.cuda.is_available() else torch.cuda.get_device_name()
     
     if n_projections is None:
         if feature_maps is None:
@@ -53,7 +53,6 @@ def srp_extraction(model_string, feature_maps = None, model_inputs=None, output_
         model = eval(model_call)
         model = model.eval()
         if torch.cuda.is_available():
-            torch.cuda.set_device(device)
             model = model.cuda()
         
         feature_map_names = get_empty_feature_maps(model, names_only = True)
