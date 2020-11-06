@@ -95,7 +95,7 @@ from sklearn.linear_model import ElasticNet
 from sklearn.model_selection import KFold, RepeatedKFold
 from scipy.stats import pearsonr, spearmanr
 
-def kfold_nonnegative_regression(target_rdm, model_rdms, regression_type='linear', n_splits=6, n_repeats=None, 
+def kfold_nonnegative_regression(target_rdm, model_rdms, regression_type='linear', n_splits=10, n_repeats=None, 
                               random_state=None, zero_coef_alert=False):
     '''
         target_rdm: your brain data RDM (n_samples x n_samples)

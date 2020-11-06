@@ -1,4 +1,4 @@
-taskname,model,category,description
+taskname,model,cluster,description
 Autoencoder,autoencoding,2D,Image compression and decompression
 Object Classification,class_object,Semantic,1000-way object classification (via knowledge distillation from ImageNet).
 Scene Classification,class_scene,Semantic,Scene Classification (via knowledge distillation from MIT Places).

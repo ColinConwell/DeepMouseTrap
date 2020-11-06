@@ -1,13 +1,17 @@
-import torchvision.transforms as transforms
-from torch.utils.data import Dataset, DataLoader
-from torch.autograd import Variable
-from collections import OrderedDict
+import os, sys, json
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 from tqdm.auto import tqdm as tqdm
+from collections import OrderedDict
+
 from PIL import Image
 import torch.nn as nn
 import torch, torchvision
-import pandas as pd
-import numpy as np
+import torchvision.transforms as transforms
+from torch.utils.data import Dataset, DataLoader
+from torch.autograd import Variable
 
 image_transforms = {
     'imagenet_from_numpy': transforms.Compose([
@@ -163,54 +167,40 @@ def get_empty_feature_maps(model, input_size=(3,224,224), dataset_size=1, layers
     if names_only == False:
         return empty_feature_maps  
 
-def get_all_feature_maps(model, inputs, layers_to_retain=None, use_tqdm = True, flatten=True, numpy=True):
+def get_all_feature_maps(model, inputs, extract_by_stack=False, layers_to_retain=None, 
+                         use_tqdm = True, flatten=True, numpy=True, remove_duplicates=True):
+    
     if isinstance(inputs, DataLoader):
-        input_size, dataset_size, start_index = inputs.dataset[0].shape, len(inputs.dataset), 0
-        feature_maps = get_empty_feature_maps(model, input_size, dataset_size, layers_to_retain)
-        for i, imgs in enumerate(tqdm(inputs)) if use_tqdm else enumerate(inputs):
-            imgs = imgs.cuda() if next(model.parameters()).is_cuda else imgs
-            batch_feature_map = get_feature_maps(model, imgs)
-            for layer in feature_maps.keys():
-                feature_maps[layer][start_index:start_index+imgs.shape[0],...] = batch_feature_map[layer]
-            start_index += imgs.shape[0]
+        if not extract_by_stack:
+            input_size, dataset_size, start_index = inputs.dataset[0].shape, len(inputs.dataset), 0
+            feature_maps = get_empty_feature_maps(model, input_size, dataset_size, layers_to_retain)
+            for i, imgs in enumerate(tqdm(inputs)) if use_tqdm else enumerate(inputs):
+                imgs = imgs.cuda() if next(model.parameters()).is_cuda else imgs
+                batch_feature_map = get_feature_maps(model, imgs)
+                for layer in feature_maps.keys():
+                    feature_maps[layer][start_index:start_index+imgs.shape[0],...] = batch_feature_map[layer]
+                start_index += imgs.shape[0]
+                
+        if extract_by_stack:
+            if layers_to_retain is None:
+                feature_maps = get_empty_feature_maps(model)
+            if layers_to_retain is not None:
+                feature_maps = {layer: None for layer in layers_to_retain}
+            for i, imgs in enumerate(tqdm(inputs)) if use_tqdm else enumerate(inputs):
+                imgs = imgs.cuda() if next(model.parameters()).is_cuda else imgs
+                batch_feature_map = get_feature_maps(model, imgs)
+                for layer in feature_maps.keys():
+                    if feature_maps[layer] == None:
+                        feature_maps[layer] = batch_feature_map[layer]
+                    if feature_maps[layer] != None:
+                        feature_maps[layer] = torch.cat((feature_maps[layer], batch_feature_map[layer]))
                     
     if not isinstance(inputs, DataLoader):
         inputs = inputs.cuda() if next(model.parameters()).is_cuda else inputs
-        feature_maps = get_feature_maps(model, inputs, layers_to_retain)
-        
-    feature_maps = remove_duplicate_feature_maps(feature_maps)
+        feature_maps = get_feature_maps(model, inputs, layers_to_retain, use_tqdm, remove_duplicates)
     
-    if flatten == True:
-        for map_key in feature_maps:
-            incoming_map = feature_maps[map_key]
-            feature_maps[map_key] = incoming_map.reshape(incoming_map.shape[0], -1)
-            
-    if numpy == True:
-        for map_key in feature_maps:
-            feature_maps[map_key] = feature_maps[map_key].numpy()
-            
-    return feature_maps
-
-def get_all_feature_maps_bystack(model, inputs, layers_to_retain=None, use_tqdm = True, flatten=True, numpy=True):
-    if isinstance(inputs, DataLoader):
-        if layers_to_retain is None:
-            feature_maps = get_empty_feature_maps(model)
-        if layers_to_retain is not None:
-            feature_maps = {layer: None for layer in layers_to_retain}
-        for i, imgs in enumerate(tqdm(inputs)) if use_tqdm else enumerate(inputs):
-            imgs = imgs.cuda() if next(model.parameters()).is_cuda else imgs
-            batch_feature_map = get_feature_maps(model, imgs)
-            for layer in feature_maps.keys():
-                if feature_maps[layer] == None:
-                    feature_maps[layer] = batch_feature_map[layer]
-                if feature_maps[layer] != None:
-                    feature_maps[layer] = torch.cat((feature_maps[layer], batch_feature_map[layer]))
-    
-    if not isinstance(inputs, DataLoader):
-        inputs = inputs.cuda() if next(model.parameters()).is_cuda else inputs
-        feature_maps = get_feature_maps(model, inputs)
-        
-    feature_maps = remove_duplicate_feature_maps(feature_maps)
+    if remove_duplicates == True:
+        feature_maps = remove_duplicate_feature_maps(feature_maps)
     
     if flatten == True:
         for map_key in feature_maps:
@@ -261,4 +251,42 @@ def get_feature_map_size(feature_maps, layer=None):
 def chunk_list(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
+        
+def reverse_imagenet_transforms(img_array):
+    if torch.is_tensor(img_array):
+        img_array = img_array.numpy()
+    if len(img_array.shape) == 3:
+        img_array = img_array.transpose((1,2,0))
+    if len(img_array.shape) == 4:
+        img_array = img_array.transpose((0,2,3,1))
+    mean = np.array([0.485, 0.456, 0.406])
+    std = np.array([0.229, 0.224, 0.225])
+    img_array = np.clip(std * img_array + mean, 0, 1)
+    
+    return(img_array)
+
+def numpy_to_pil(img_array):
+    img_dim = np.array(img_array.shape)
+    if (img_dim[-1] not in (1,3)) & (len(img_dim) == 3):
+        img_array = img_array.transpose(1,2,0)
+    if (img_dim[-1] not in (1,3)) & (len(img_dim) == 4):
+        img_array = img_array.transpose(0,2,3,1)
+    if ((img_array >= 0) & (img_array <= 1)).all():
+        img_array = img_array * 255
+    if img_array.dtype != 'uint8':
+        img_array = np.uint8(img_array)
+    
+    return (img_array)
+
+def get_dataloader_sample(dataloader, title=None):
+    image_grid = torchvision.utils.make_grid(next(iter(dataloader)))
+    image_grid = image_grid.numpy().transpose((1, 2, 0))
+    mean = np.array([0.485, 0.456, 0.406])
+    std = np.array([0.229, 0.224, 0.225])
+    image_grid = std * image_grid + mean
+    image_grid = np.clip(image_grid, 0, 1)
+    plt.imshow(image_grid)
+    if title is not None:
+        plt.title(title)
+    plt.pause(0.001)
         
