@@ -212,6 +212,51 @@ def get_all_feature_maps(model, inputs, extract_by_stack=False, layers_to_retain
             feature_maps[map_key] = feature_maps[map_key].numpy()
             
     return feature_maps
+
+def get_feature_map_metadata(model, input_size=(3,224,224), remove_duplicates = True):
+    def register_hook(module):
+        def hook(module, input, output):
+            module_name = get_module_name(module, metadata)
+            metadata[module_name] = {}
+            feature_map = output.cpu().detach()
+            feature_maps[module_name] = feature_map
+            
+            
+            metadata[module_name]['feature_map_shape'] = feature_map.numpy().squeeze().shape
+            metadata[module_name]['feature_count'] = feature_map.numpy().reshape(1, -1).shape[1]
+            
+            params = 0
+            if hasattr(module, "weight") and hasattr(module.weight, "size"):
+                params += torch.prod(torch.LongTensor(list(module.weight.size())))
+            if hasattr(module, "bias") and hasattr(module.bias, "size"):
+                params += torch.prod(torch.LongTensor(list(module.bias.size())))
+            if isinstance(params, torch.Tensor):
+                params = params.item()
+            metadata[module_name]['parameter_count'] = params
+                
+        if (not isinstance(module, nn.Sequential) and not isinstance(module, nn.ModuleList)):
+            hooks.append(module.register_forward_hook(hook))
+            
+    inputs = torch.rand(1, *input_size)
+    if next(model.parameters()).is_cuda:
+        inputs = inputs.cuda()
+    
+    feature_maps = OrderedDict()
+    metadata = OrderedDict()
+    hooks = []
+    
+    model.apply(register_hook)
+    with torch.no_grad():
+        model(inputs)
+
+    for hook in hooks:
+        hook.remove()
+        
+    if remove_duplicates:
+        feature_maps = remove_duplicate_feature_maps(feature_maps)
+        metadata = {k:v for (k,v) in metadata.items() if k in feature_maps}
+        
+    return(metadata)  
         
 # Helpers: Dataloaders and functions for facilitating feature extraction
         
@@ -231,6 +276,9 @@ class Array2DataLoader(Dataset):
     
     def __len__(self):
         return self.images.shape[0]
+    
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
     
 def get_feature_map_size(feature_maps, layer=None):
     total_size = 0

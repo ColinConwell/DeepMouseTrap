@@ -1,9 +1,8 @@
-taskname,model,cluster,description
+taskname,model,category,description
 Autoencoder,autoencoding,2D,Image compression and decompression
 Object Classification,class_object,Semantic,1000-way object classification (via knowledge distillation from ImageNet).
 Scene Classification,class_scene,Semantic,Scene Classification (via knowledge distillation from MIT Places).
 Curvatures,curvature,3D,Magnitude of 3D principal curvatures
-Colorization,colorization,,Colorizing input grayscale images.
 Denoising,denoising,Other,Uncorrupted version of corrupted image.
 Euclidean Depth,depth_euclidean,3D,Depth estimation
 Z-Buffer Depth,depth_zbuffer,3D,Depth estimation.

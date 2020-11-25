@@ -30,9 +30,9 @@ from visual_priors import taskonomy_network
 
 task_typology = pd.read_csv(path_dir + '/task_typology.csv')
 
-def instantiate_taskonomy_model(model_name):
+def instantiate_taskonomy_model(model_name, verbose = False):
     weights = torch.load(path_dir + '/task_weights/{}_encoder.pth'.format(model_name))
-    print('{} weights loaded succesfully.'.format(model_name))
+    if verbose: print('{} weights loaded succesfully.'.format(model_name))
     model = taskonomy_network.TaskonomyEncoder()
     model.load_state_dict(weights['state_dict'])
     

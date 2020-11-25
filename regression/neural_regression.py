@@ -11,25 +11,32 @@ from sklearn.preprocessing import scale
 from sklearn.model_selection import KFold
 from scipy.stats import pearsonr
 
+def anscombe_transform(x):
+    return 2.0*np.sqrt(x + 3.0/8.0)
+
+### Scoring Options ---------------------------------------------------------
+
 pearsonr_vec = np.vectorize(pearsonr, signature='(n),(n)->(),()')
 
-def pearson_r2_score(y_true, y_pred, multioutput=None):
+def pearson_r_score(y_true, y_pred, multioutput=None):
     y_true_ = y_true.transpose()
     y_pred_ = y_pred.transpose()
-    return(pearsonr_vec(y_true_, y_pred_)[0]**2)
+    return(pearsonr_vec(y_true_, y_pred_)[0])
+
+def pearson_r2_score(y_true, y_pred, multioutput=None):
+    return(pearson_r_score(y_true, y_pred)**2)
 
 def get_predicted_values(y_true, y_pred, transform = None):
     if transform == None:
         return(y_pred)
 
-scoring_options = {'r2': r2_score, 'pearson_r2': pearson_r2_score, 
-                   'explained_variance': explained_variance_score, 
-                   'predicted_values': get_predicted_values}
+scoring_options = {'r2': r2_score, 'pearson_r': pearson_r_score, 'pearson_r2': pearson_r2_score,
+                   'explained_variance': explained_variance_score, 'predicted_values': get_predicted_values}
 
 def get_scoring_options():
     return scoring_options
 
-def score_func(y_true, y_pred, score_type='pearson_r2'):
+def score_func(y_true, y_pred, score_type='pearson_r'):
     if not isinstance(score_type, list):
         return(scoring_options[score_type](y_true, y_pred, multioutput='raw_values'))
     
@@ -39,9 +46,17 @@ def score_func(y_true, y_pred, score_type='pearson_r2'):
             scoring_dict[score_type_i] = scoring_options[score_type_i](y_true, y_pred, multioutput='raw_values')
         
     return(scoring_dict)
+
+### Regression Methods ---------------------------------------------------------
         
-        
-def kfold_regression(regression, X, y, n_splits, score_type = 'pearson_r2', return_preds = False, use_tqdm = True):
+def kfold_regression(X, y, regression, n_splits, score_type, use_tqdm):
+    if regression == 'ridge':
+        regression = Ridge(alpha = 1.0)
+    if regression == 'pls':
+        regression = PLSRegression(n_components = 10)
+    if isinstance(regression, str) and regression not in ('ridge','pls'):
+        assert "Unknown regression string. Please use one of ('ridge', 'pls') or an sklearn regression object."
+    
     kfolds = KFold(n_splits, shuffle=False).split(np.arange(y.shape[0]))
     kfolds_tqdm = tqdm(kfolds, total = n_splits, leave=False)
     
@@ -52,29 +67,43 @@ def kfold_regression(regression, X, y, n_splits, score_type = 'pearson_r2', retu
         regression = regression.fit(X_train, y_train)
         y_pred[test_indices] = regression.predict(X_test)
             
-    scores = score_func(y, y_pred, score_type)
-    
-    if not return_preds:
-        return(scores)
-    if return_preds:
-        return(scores, y_pred)
-    
+    return score_func(y, y_pred, score_type)
 
-### PLS Regression
-
-def kfold_pls_regression(X, y, n_components = 10, n_splits = 6, score_type = 'pearson_r2', return_preds = False, use_tqdm = True):
-    return kfold_regression(PLSRegression(n_components = n_components), X, y, n_splits, score_type, return_preds, use_tqdm)
-
-#### Ridge Regression
-
-def kfold_ridge_regression(X, y, alpha = 1.0, n_splits = 6, score_type = 'pearson_r2', return_preds = False, use_tqdm = True):
-    return kfold_regression(Ridge(alpha = alpha), X, y, n_splits, score_type, return_preds, use_tqdm)
-
-def gcv_ridge_regression(X,y, alpha = 1.0, score_type = 'pearson_r2', return_preds = False):
-    regression = RidgeCV(alphas=[alpha], store_cv_values = True, scoring = 'r2').fit(X,y)
+def gcv_ridge_regression(X,y, score_type, alphas = [1.0]):
+    regression = RidgeCV(alphas=alphas, store_cv_values = True, 
+                         scoring = 'explained_variance').fit(X,y)
     y_pred = regression.cv_values_.squeeze()
-    scores = score_func(y, y_pred, score_type)
-    if return_preds:
-        return(scores, y_pred)
-    if not return_preds:
-        return(scores)
+    
+    return score_func(y, y_pred, score_type)
+    
+def neural_regression(feature_map, neural_response, regression = 'ridge', cv = 'kfold',
+                      score_type = 'pearson_r', use_tqdm = True, **kwargs):
+    
+    if cv == 'gcv' and regression != 'ridge':
+        raise Warning("gcv mode selected, but regression is not ridge." +
+                      "ignoring regression argument...")
+        
+    X,y = feature_map, neural_response
+    
+    if cv == 'gcv':
+        alphas = kwargs['alphas'] if 'alphas' in kwargs else [1.0]
+        return gcv_ridge_regression(X, y, score_type, alphas = alphas)
+    
+    if cv == 'kfold':
+        n_splits = kwargs['n_splits'] if 'n_splits' in kwargs else 6
+        return kfold_regression(X, y, regression, n_splits, score_type, use_tqdm)
+    
+### Data Transforms ---------------------------------------------------------
+
+def max_transform(df, group_vars, measure_var = 'score', deduplicate=True):
+    if not isinstance(group_vars, list):
+        group_vars = list(group_vars)
+    
+    max_df = (df[df.groupby(group_vars)[measure_var]
+                 .transform(max) == df[measure_var]]).reset_index(drop=True)
+                 
+    if deduplicate:
+        max_df = max_df[~max_df.duplicated(group_vars + [measure_var])]
+        
+    return max_df
+

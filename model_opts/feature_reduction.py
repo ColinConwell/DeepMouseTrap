@@ -113,8 +113,6 @@ def rdm_extraction(model_string, model = None, feature_maps = None, model_inputs
         model_rdms = pickle.load(open(output_file,'rb'))
         
     if not os.path.exists(output_file):
-        os.makedirs(output_file)
-        
         if feature_maps is None:
             if model == None:
                 model = retrieve_prepped_model(model_string)
@@ -122,7 +120,7 @@ def rdm_extraction(model_string, model = None, feature_maps = None, model_inputs
             feature_maps = get_all_feature_maps(model, model_inputs)
         
         model_rdms = {}
-        for model_layer in tqdm(feature_maps) if not in_notebook else tqdm(feature_maps, leave=False):
+        for model_layer in tqdm(feature_maps, leave=False) if in_notebook else tqdm(feature_maps):
             model_rdms[model_layer] = np.corrcoef(feature_maps[model_layer])
         with open(output_file, 'wb') as file:
             pickle.dump(model_rdms, file)
