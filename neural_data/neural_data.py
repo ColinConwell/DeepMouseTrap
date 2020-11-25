@@ -1,6 +1,7 @@
 import os, sys
 import numpy as np
 import pandas as pd
+from PIL import Image
 
 def iterative_subset(df, index, cat_list):
     out_dict = {}
