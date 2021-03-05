@@ -42,8 +42,6 @@ def convert_relu(parent):
 
 # Method 1: Flatten model; extract features by layer
 
-from fastai.torch_core import flatten_model
-
 class SaveFeatures():
     def __init__(self, module):
         self.hook = module.register_forward_hook(self.hook_fn)
@@ -66,7 +64,6 @@ def get_features_by_layer(model, target_layer, img_tensor):
     model(img_tensor)
     features.close()
     return features.extract()
-
 
 # Method 2: Hook all layers simultaneously; remove duplicates
 
@@ -326,8 +323,8 @@ def numpy_to_pil(img_array):
     
     return (img_array)
 
-def get_dataloader_sample(dataloader, title=None):
-    image_grid = torchvision.utils.make_grid(next(iter(dataloader)))
+def get_dataloader_sample(dataloader, nrow = 8, title=None):
+    image_grid = torchvision.utils.make_grid(next(iter(dataloader)), nrow = nrow)
     image_grid = image_grid.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])

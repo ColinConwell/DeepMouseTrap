@@ -1,40 +1,104 @@
-model_name,formal_model_name,model_type,training
-alexnet,AlexNet,imagenet,imagenet
-vgg11,VGG11,imagenet,imagenet
-vgg13,VGG13,imagenet,imagenet
-vgg16,VGG16,imagenet,imagenet
-vgg19,VGG19,imagenet,imagenet
-vgg11_bn,VGG11-BatchNorm,imagenet,imagenet
-vgg13_bn,VGG13-BatchNorm,imagenet,imagenet
-vgg16_bn,VGG16-BatchNorm,imagenet,imagenet
-vgg19_bn,VGG19-BatchNorm,imagenet,imagenet
-resnet18,ResNet18,imagenet,imagenet
-resnet34,ResNet34,imagenet,imagenet
-resnet50,ResNet50,imagenet,imagenet
-resnet101,ResNet101,imagenet,imagenet
-resnet152,ResNet152,imagenet,imagenet
-squeezenet1_0,SqueezeNet1.0,imagenet,imagenet
-squeezenet1_1,SqueezeNet1.1,imagenet,imagenet
-densenet121,DenseNet121,imagenet,imagenet
-densenet161,DenseNet161,imagenet,imagenet
-densenet169,DenseNet169,imagenet,imagenet
-densenet201,DenseNet201,imagenet,imagenet
-googlenet,GoogleNet,imagenet,imagenet
-shufflenet_v2_x0_5,ShuffleNet-V2-x0.5,imagenet,imagenet
-shufflenet_v2_x1_0,ShuffleNet-V2-x1.0,imagenet,imagenet
-mobilenet_v2,MobileNet-V2,imagenet,imagenet
-resnext50_32x4d,ResNext50-32x4D,imagenet,imagenet
-resnext101_32x8d,ResNext50-32x8D,imagenet,imagenet
-wide_resnet50_2,Wide-ResNet50,imagenet,imagenet
-wide_resnet101_2,Wide-ResNet101,imagenet,imagenet
-mnasnet0_5,MNASNet0.5,imagenet,imagenet
-mnasnet1_0,MNASNet1.0,imagenet,imagenet
-inception_v3,Inception-V3,inception,imagenet
-fasterrcnn_resnet50_fpn,FasterRCNN-Resnet50-FPN,segmentation,coco2017
-maskrcnn_resnet50_fpn,MaskRCNN-Resnet50-FPN,segmentation,coco2017
-keypointrcnn_resnet50_fpn,KeyPointRCNN-Resnet50-FPN,segmentation,coco2017
-deeplabv3_resnet101,DeepLabV3-Resnet101,detection,coco2017
-fcn_resnet101,FCN-Resnet101,detection,coco2017
-r3d_18,R3D-18,video,kinetics400
-r2plus1d_18,R2Plus1D-18,video,kinetics400
-mc3_18,MC3-18,video,kinetics400
+model,model_display_name,model_type,train_type,train_data,description,task_cluster,model_source,model_source_url
+alexnet,AlexNet,imagenet,imagenet,imagenet,AlexNet trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg11,VGG11,imagenet,imagenet,imagenet,VGG11 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg13,VGG13,imagenet,imagenet,imagenet,VGG13 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg16,VGG16,imagenet,imagenet,imagenet,VGG16 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg19,VGG19,imagenet,imagenet,imagenet,VGG19 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg11_bn,VGG11-BatchNorm,imagenet,imagenet,imagenet,VGG11-BatchNorm trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg13_bn,VGG13-BatchNorm,imagenet,imagenet,imagenet,VGG13-BatchNorm trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg16_bn,VGG16-BatchNorm,imagenet,imagenet,imagenet,VGG16-BatchNorm trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg19_bn,VGG19-BatchNorm,imagenet,imagenet,imagenet,VGG19-BatchNorm trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet18,ResNet18,imagenet,imagenet,imagenet,ResNet18 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet34,ResNet34,imagenet,imagenet,imagenet,ResNet34 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet50,ResNet50,imagenet,imagenet,imagenet,ResNet50 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet101,ResNet101,imagenet,imagenet,imagenet,ResNet101 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet152,ResNet152,imagenet,imagenet,imagenet,ResNet152 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+squeezenet1_0,SqueezeNet1.0,imagenet,imagenet,imagenet,SqueezeNet1.0 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+squeezenet1_1,SqueezeNet1.1,imagenet,imagenet,imagenet,SqueezeNet1.1 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+densenet121,DenseNet121,imagenet,imagenet,imagenet,DenseNet121 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+densenet161,DenseNet161,imagenet,imagenet,imagenet,DenseNet161 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+densenet169,DenseNet169,imagenet,imagenet,imagenet,DenseNet169 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+densenet201,DenseNet201,imagenet,imagenet,imagenet,DenseNet201 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+googlenet,GoogleNet,imagenet,imagenet,imagenet,GoogleNet trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+shufflenet_v2_x0_5,ShuffleNet-V2-x0.5,imagenet,imagenet,imagenet,ShuffleNet-V2-x0.5 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+shufflenet_v2_x1_0,ShuffleNet-V2-x1.0,imagenet,imagenet,imagenet,ShuffleNet-V2-x1.0 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+mobilenet_v2,MobileNet-V2,imagenet,imagenet,imagenet,MobileNet-V2 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnext50_32x4d,ResNext50-32x4D,imagenet,imagenet,imagenet,ResNext50-32x4D trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnext101_32x8d,ResNext50-32x8D,imagenet,imagenet,imagenet,ResNext50-32x8D trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+wide_resnet50_2,Wide-ResNet50,imagenet,imagenet,imagenet,Wide-ResNet50 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+wide_resnet101_2,Wide-ResNet101,imagenet,imagenet,imagenet,Wide-ResNet101 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+mnasnet0_5,MNASNet0.5,imagenet,imagenet,imagenet,MNASNet0.5 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+mnasnet1_0,MNASNet1.0,imagenet,imagenet,imagenet,MNASNet1.0 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+inception_v3,Inception-V3,inception,imagenet,imagenet,Inception-V3 trained on image classification with the ImageNet dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+fasterrcnn_resnet50_fpn,FasterRCNN-Resnet50-FPN,segmentation,segmentation,coco2017,FasterRCNN-Resnet50-FPN trained on image segmentation with the CoCo2017 dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+maskrcnn_resnet50_fpn,MaskRCNN-Resnet50-FPN,segmentation,segmentation,coco2017,MaskRCNN-Resnet50-FPN trained on image segmentation with the CoCo2017 dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+keypointrcnn_resnet50_fpn,KeyPointRCNN-Resnet50-FPN,segmentation,segmentation,coco2017,KeyPointRCNN-Resnet50-FPN trained on image segmentation with the CoCo2017 dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+deeplabv3_resnet101,DeepLabV3-Resnet101,detection,detection,coco2017,DeepLabV3-Resnet101 trained on keypoint detection with the CoCo2017 dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+fcn_resnet101,FCN-Resnet101,detection,detection,coco2017,FCN-Resnet101 trained on keypoint detection with the CoCo2017 dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+r3d_18,R3D-18,video,video,kinetics400,R3D-18 trained on video classification with the Kinetics400 dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+r2plus1d_18,R2Plus1D-18,video,video,kinetics400,R2Plus1D-18 trained on video classification with the Kinetics400 dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+mc3_18,MC3-18,video,video,kinetics400,MC3-18 trained on video classification with the Kinetics400 dataset.,Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+alexnet,AlexNet,imagenet,random,,"AlexNet randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg11,VGG11,imagenet,random,,"VGG11 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg13,VGG13,imagenet,random,,"VGG13 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg16,VGG16,imagenet,random,,"VGG16 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg19,VGG19,imagenet,random,,"VGG19 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg11_bn,VGG11-BatchNorm,imagenet,random,,"VGG11-BatchNorm randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg13_bn,VGG13-BatchNorm,imagenet,random,,"VGG13-BatchNorm randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg16_bn,VGG16-BatchNorm,imagenet,random,,"VGG16-BatchNorm randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+vgg19_bn,VGG19-BatchNorm,imagenet,random,,"VGG19-BatchNorm randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet18,ResNet18,imagenet,random,,"ResNet18 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet34,ResNet34,imagenet,random,,"ResNet34 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet50,ResNet50,imagenet,random,,"ResNet50 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet101,ResNet101,imagenet,random,,"ResNet101 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnet152,ResNet152,imagenet,random,,"ResNet152 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+squeezenet1_0,SqueezeNet1.0,imagenet,random,,"SqueezeNet1.0 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+squeezenet1_1,SqueezeNet1.1,imagenet,random,,"SqueezeNet1.1 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+densenet121,DenseNet121,imagenet,random,,"DenseNet121 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+densenet161,DenseNet161,imagenet,random,,"DenseNet161 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+densenet169,DenseNet169,imagenet,random,,"DenseNet169 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+densenet201,DenseNet201,imagenet,random,,"DenseNet201 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+googlenet,GoogleNet,imagenet,random,,"GoogleNet randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+shufflenet_v2_x0_5,ShuffleNet-V2-x0.5,imagenet,random,,"ShuffleNet-V2-x0.5 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+shufflenet_v2_x1_0,ShuffleNet-V2-x1.0,imagenet,random,,"ShuffleNet-V2-x1.0 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+mobilenet_v2,MobileNet-V2,imagenet,random,,"MobileNet-V2 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnext50_32x4d,ResNext50-32x4D,imagenet,random,,"ResNext50-32x4D randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+resnext101_32x8d,ResNext50-32x8D,imagenet,random,,"ResNext50-32x8D randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+wide_resnet50_2,Wide-ResNet50,imagenet,random,,"Wide-ResNet50 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+wide_resnet101_2,Wide-ResNet101,imagenet,random,,"Wide-ResNet101 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+mnasnet0_5,MNASNet0.5,imagenet,random,,"MNASNet0.5 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+mnasnet1_0,MNASNet1.0,imagenet,random,,"MNASNet1.0 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+inception_v3,Inception-V3,inception,random,,"Inception-V3 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+fasterrcnn_resnet50_fpn,FasterRCNN-Resnet50-FPN,segmentation,random,,"FasterRCNN-Resnet50-FPN randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+maskrcnn_resnet50_fpn,MaskRCNN-Resnet50-FPN,segmentation,random,,"MaskRCNN-Resnet50-FPN randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+keypointrcnn_resnet50_fpn,KeyPointRCNN-Resnet50-FPN,segmentation,random,,"KeyPointRCNN-Resnet50-FPN randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+deeplabv3_resnet101,DeepLabV3-Resnet101,detection,random,,"DeepLabV3-Resnet101 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+fcn_resnet101,FCN-Resnet101,detection,random,,"FCN-Resnet101 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+r3d_18,R3D-18,video,random,,"R3D-18 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+r2plus1d_18,R2Plus1D-18,video,random,,"R2Plus1D-18 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+mc3_18,MC3-18,video,random,,"MC3-18 randomly initialized, with no training.",Semantic,torchvision_model_zoo,pytorch.org/docs/stable/torchvision/models.html
+autoencoding,Autoencoder,taskonomy,taskonomy,taskonomy,Image compression and decompression,2D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+class_object,Object Classification,taskonomy,taskonomy,taskonomy,1000-way object classification (via knowledge distillation from ImageNet).,Semantic,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+class_scene,Scene Classification,taskonomy,taskonomy,taskonomy,Scene Classification (via knowledge distillation from MIT Places).,Semantic,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+curvature,Curvatures,taskonomy,taskonomy,taskonomy,Magnitude of 3D principal curvatures,3D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+denoising,Denoising,taskonomy,taskonomy,taskonomy,Uncorrupted version of corrupted image.,Other,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+depth_euclidean,Euclidean Depth,taskonomy,taskonomy,taskonomy,Depth estimation,3D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+depth_zbuffer,Z-Buffer Depth,taskonomy,taskonomy,taskonomy,Depth estimation.,3D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+edge_occlusion,Occlusion Edges,taskonomy,taskonomy,taskonomy,Edges which include parts of the scene.,3D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+edge_texture,Texture Edges,taskonomy,taskonomy,taskonomy,Edges computed from RGB only (texture edges).,2D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+egomotion,Egomotion,taskonomy,taskonomy,taskonomy,Odometry (camera poses) given three input images.,Geometric,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+fixated_pose,Camera Pose (Fixated),taskonomy,taskonomy,taskonomy,Relative camera pose with matching optical centers.,Geometric,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+inpainting,Inpainting,taskonomy,taskonomy,taskonomy,Filling in masked center of image.,2D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+jigsaw,Jigsaw,taskonomy,taskonomy,taskonomy,Putting scrambled image pieces back together.,Geometric,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+keypoints2d,2D Keypoints,taskonomy,taskonomy,taskonomy,Keypoint estimation from RGB-only (texture features).,2D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+keypoints3d,3D Keypoints,taskonomy,taskonomy,taskonomy,3D Keypoint estimation from underlying scene 3D.,3D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+nonfixated_pose,Camera Pose (Nonfixated),taskonomy,taskonomy,taskonomy,Relative camera pose with distinct optical centers.,Geometric,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+normal,Surface Normals,taskonomy,taskonomy,taskonomy,Pixel-wise surface normals.,Other,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+point_matching,Point Matching,taskonomy,taskonomy,taskonomy,Classifying if centers of two images match or not.,Geometric,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+reshading,Reshading,taskonomy,taskonomy,taskonomy,Reshading with new lighting placed at camera location.,3D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+room_layout,Room Layout,taskonomy,taskonomy,taskonomy,Orientation and aspect ratio of cubic room layout.,Geometric,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+segment_semantic,Semantic Segmentation,taskonomy,taskonomy,taskonomy,Pixel-wise semantic labeling (via knowledge distillation from MS COCO).,Semantic,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+segment_unsup25d,Unsupervised 2.5D Segmentation,taskonomy,taskonomy,taskonomy,Segmentation (graph cut approximation) on RGB-D-Normals-Curvature image.,3D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+segment_unsup2d,Unsupervised 2D Segmentation,taskonomy,taskonomy,taskonomy,Segmentation (graph cut approximation) on RGB.,2D,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+vanishing_point,Vanishing Point,taskonomy,taskonomy,taskonomy,Three Manhattan-world vanishing points.,Geometric,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors
+random_weights,Taskonomy (Random Weights),taskonomy,taskonomy,,Taskonomy architecture randomly initialized.,Random,taskonomy_project,github.com/alexsax/midlevel-reps/tree/visualpriors

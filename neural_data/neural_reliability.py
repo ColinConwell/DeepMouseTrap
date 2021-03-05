@@ -10,7 +10,7 @@ def splithalf_r(x, n_splits=100, mode='spearman-brown'):
     Arguments
     
     x           -   A NumPy array with shape (M,N), where M is the number of
-                    trials and N is the number of neurons or neural sites.
+                    observations (trials) and N is the number of stimuli.
                     M will be split in half to compute the reliability, not N!
     
     Keyword Arguments

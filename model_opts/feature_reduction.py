@@ -15,7 +15,7 @@ from sklearn.decomposition import PCA
 from feature_extraction import *
 from model_options import *
 
-def retrieve_prepped_model(model_string):
+def get_prepped_model(model_string):
     model_options = get_model_options()
     model_call = model_options[model_string]['call']
     model = eval(model_call)
@@ -67,7 +67,7 @@ def srp_extraction(model_string, model = None, feature_maps = None, model_inputs
         
     if feature_maps is None:
         if model == None:
-            model = retrieve_prepped_model(model_string)
+            model = get_prepped_model(model_string)
         
         feature_map_names = get_empty_feature_maps(model, names_only = True)
         output_filepaths = get_feature_map_filepaths(model_string, feature_map_names, output_dir)
@@ -95,7 +95,8 @@ def srp_extraction(model_string, model = None, feature_maps = None, model_inputs
             
     return(srp_feature_maps)
 
-def rdm_extraction(model_string, model = None, feature_maps = None, model_inputs = None, output_dir='rdm_arrays', in_notebook=False):
+def rdm_extraction(model_string, model = None, feature_maps = None, model_inputs = None, 
+                   output_dir='rdm_arrays', append_suffix = False, in_notebook=False):
     
     check_model(model_string, model)
     check_reduction_inputs(feature_maps, model_inputs)
@@ -108,14 +109,16 @@ def rdm_extraction(model_string, model = None, feature_maps = None, model_inputs
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     
-    output_file = os.path.join(output_dir, model_string + '_rdms.pkl')
+    
+    output_file = os.path.join(output_dir, model_string + '_rdms.pkl' 
+                           if append_suffix else model_string + '.pkl')
     if os.path.exists(output_file):
         model_rdms = pickle.load(open(output_file,'rb'))
         
     if not os.path.exists(output_file):
         if feature_maps is None:
             if model == None:
-                model = retrieve_prepped_model(model_string)
+                model = get_prepped_model(model_string)
                 
             feature_maps = get_all_feature_maps(model, model_inputs)
         
@@ -165,7 +168,7 @@ def pca_extraction(model_string, model = None, feature_maps = None, model_inputs
         os.makedirs(output_dir)
 
     if model == None:
-        model = retrieve_prepped_model(model_string)
+        model = get_prepped_model(model_string)
         
     if feature_maps is None:
         feature_map_names = get_empty_feature_maps(model, names_only = True)

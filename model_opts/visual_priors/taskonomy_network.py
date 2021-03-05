@@ -33,7 +33,7 @@ task_mapping = {
 
 
 CHANNELS_TO_TASKS = {
-    1: ['colorization', 'edge_texture', 'edge_occlusion',  'keypoints3d', 'keypoints2d', 'reshading', 'depth_zbuffer', 'depth_euclidean', ],
+    1: ['colorization', 'edge_texture', 'edge_occlusion',  'keypoints3d', 'keypoints2d', 'reshading', 'depth_zbuffer', 'depth_euclidean'],
     2: ['curvature', 'principal_curvature'],
     3: ['autoencoding', 'denoising', 'normal', 'inpainting', 'rgb', 'normals'],
     17: ['segment_semantic'],

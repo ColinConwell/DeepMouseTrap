@@ -58,10 +58,10 @@ def kfold_regression(X, y, regression, n_splits, score_type, use_tqdm):
         assert "Unknown regression string. Please use one of ('ridge', 'pls') or an sklearn regression object."
     
     kfolds = KFold(n_splits, shuffle=False).split(np.arange(y.shape[0]))
-    kfolds_tqdm = tqdm(kfolds, total = n_splits, leave=False)
+    kfolds = tqdm(kfolds, total = n_splits, leave=False) if use_tqdm else kfolds
     
     y_pred = np.zeros((y.shape[0],y.shape[1]))
-    for train_indices, test_indices in kfolds_tqdm if use_tqdm else kfolds:
+    for train_indices, test_indices in kfolds:
         X_train, X_test = X[train_indices, :], X[test_indices, :]
         y_train, y_test = y[train_indices], y[test_indices]
         regression = regression.fit(X_train, y_train)
@@ -76,22 +76,24 @@ def gcv_ridge_regression(X,y, score_type, alphas = [1.0]):
     
     return score_func(y, y_pred, score_type)
     
-def neural_regression(feature_map, neural_response, regression = 'ridge', cv = 'kfold',
-                      score_type = 'pearson_r', use_tqdm = True, **kwargs):
+def neural_regression(feature_map, neural_response, regression = Ridge(alpha=1.0), cv_splits = 5,
+                      score_type = 'pearson_r', use_tqdm = False, **kwargs):
     
-    if cv == 'gcv' and regression != 'ridge':
-        raise Warning("gcv mode selected, but regression is not ridge." +
-                      "ignoring regression argument...")
+    if cv_splits == 'gcv' and regression != 'ridge' and not isinstance(regression, Ridge):
+        raise Warning("gcv mode selected, but regression is not ridge.")
         
     X,y = feature_map, neural_response
     
-    if cv == 'gcv':
+    if cv_splits is None:
+        warnings.warn('No cv_splits selected. Returning fitted regression object...')
+        return regression.fit(X,y)
+    
+    if cv_splits == 'gcv':
         alphas = kwargs['alphas'] if 'alphas' in kwargs else [1.0]
         return gcv_ridge_regression(X, y, score_type, alphas = alphas)
     
-    if cv == 'kfold':
-        n_splits = kwargs['n_splits'] if 'n_splits' in kwargs else 6
-        return kfold_regression(X, y, regression, n_splits, score_type, use_tqdm)
+    if isinstance(cv_splits, int):
+        return kfold_regression(X, y, regression, cv_splits, score_type, use_tqdm)
     
 ### Data Transforms ---------------------------------------------------------
 
