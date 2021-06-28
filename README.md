@@ -6,7 +6,7 @@ An accompanying Google Colab notebook (bit.ly/Neural-Cheese) contains a brief tu
 
 A manuscript (currently under revision) that uses these methods may be found [here](https://www.biorxiv.org/content/biorxiv/early/2021/06/18/2021.06.18.448431.full.pdf).
 
-'''bibtex
+```bibtex
 @article{conwell2021neural,
   title={Neural Regression, Representational Similarity, Model Zoology \& Neural Taskonomy at Scale in Rodent Visual Cortex},
   author={Conwell, Colin and Mayo, David and Katz, Boris and Buice, Michael A and Alvarez, George A and Barbu, Andrei},
@@ -14,4 +14,4 @@ A manuscript (currently under revision) that uses these methods may be found [he
   year={2021},
   publisher={Cold Spring Harbor Laboratory}
 }
-'''
+```
