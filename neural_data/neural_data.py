@@ -80,10 +80,11 @@ class AllenBrainObservatory:
             image_index = np.random.randint(self.n_stimuli)
         return Image.fromarray(self.stimulus_set[image_index])
     
-    def get_neural_rdms(self, subset = None, index = 'cell_specimen_id', group_vars=['area','layer']):
+    def get_neural_rdms(self, group_vars, subset = None, index = 'cell_specimen_id', responses = None):
         cell_data = self.cell_metadata.loc[subset,:] if subset is not None else self.cell_metadata
         cell_groups = iterative_subset(cell_data.reset_index(), index, group_vars)
-        return get_rdm_by_subset(cell_groups, self.cell_responses)
+        cell_responses = self.cell_responses if responses is None else responses
+        return get_rdm_by_subset(cell_groups, cell_responses)
         
     @staticmethod
     def get_cell_subset_options():

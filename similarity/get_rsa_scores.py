@@ -61,7 +61,7 @@ if __name__ == "__main__":
     results_file = os.path.join(results_dir, model_string + '_{}.csv'.format(rsa_subtype))
     if not os.path.exists(results_file):
         
-        cell_subset_args = {'significant_running': False, 'image_selective': True, 'splithalf_r': 0.75}
+        cell_subset_args = {'significant_running': False, 'splithalf_r': 0.75}
         neural_data = AllenBrainObservatory(cell_subset_args = cell_subset_args)
         neural_rdms = neural_data.get_neural_rdms(group_vars =['cortical_area','cortical_layer'])
      

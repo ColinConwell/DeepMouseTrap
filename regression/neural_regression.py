@@ -7,8 +7,8 @@ from tqdm.auto import tqdm as tqdm
 from sklearn.metrics import r2_score, explained_variance_score
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.linear_model import Ridge, RidgeCV
-from sklearn.preprocessing import scale
 from sklearn.model_selection import KFold
+from sklearn.preprocessing import scale
 from scipy.stats import pearsonr
 
 def anscombe_transform(x):
@@ -26,7 +26,7 @@ def pearson_r_score(y_true, y_pred, multioutput=None):
 def pearson_r2_score(y_true, y_pred, multioutput=None):
     return(pearson_r_score(y_true, y_pred)**2)
 
-def get_predicted_values(y_true, y_pred, transform = None):
+def get_predicted_values(y_true, y_pred, transform = None, multioutput = None):
     if transform == None:
         return(y_pred)
 
@@ -69,12 +69,30 @@ def kfold_regression(X, y, regression, n_splits, score_type, use_tqdm):
             
     return score_func(y, y_pred, score_type)
 
-def gcv_ridge_regression(X,y, score_type, alphas = [1.0]):
+def gcv_ridge_regression(X,y, score_type, alphas = [1.0], return_best_alpha = False):
     regression = RidgeCV(alphas=alphas, store_cv_values = True, 
                          scoring = 'explained_variance').fit(X,y)
+    
     y_pred = regression.cv_values_.squeeze()
     
-    return score_func(y, y_pred, score_type)
+    if len(alphas) > 1: 
+        best_alpha_index = 0
+        current_best_score = 0
+        for alpha, alpha_index in enumerate(alphas):
+            y_pred = regression.cv_values_[:,:,alpha_index]
+            score = score_func(y, y_pred, score_type).mean()
+            if score > current_best_score:
+                current_best_score = score
+                best_alpha_index = alpha_index
+        
+        y_pred = regression.cv_values_[:,:,best_alpha_index]
+            
+    scores = score_func(y, y_pred, score_type)
+    
+    if not return_best_alpha:
+        return scores
+    if return_best_alpha:
+        return (scores, regression.alpha_)
     
 def neural_regression(feature_map, neural_response, regression = Ridge(alpha=1.0), cv_splits = 5,
                       score_type = 'pearson_r', use_tqdm = False, **kwargs):
@@ -89,8 +107,7 @@ def neural_regression(feature_map, neural_response, regression = Ridge(alpha=1.0
         return regression.fit(X,y)
     
     if cv_splits == 'gcv':
-        alphas = kwargs['alphas'] if 'alphas' in kwargs else [1.0]
-        return gcv_ridge_regression(X, y, score_type, alphas = alphas)
+        return gcv_ridge_regression(X, y, score_type, **kwargs)
     
     if isinstance(cv_splits, int):
         return kfold_regression(X, y, regression, cv_splits, score_type, use_tqdm)
@@ -109,3 +126,14 @@ def max_transform(df, group_vars, measure_var = 'score', deduplicate=True):
         
     return max_df
 
+def min_transform(df, group_vars, measure_var = 'score', deduplicate=True):
+    if not isinstance(group_vars, list):
+        group_vars = list(group_vars)
+    
+    min_df = (df[df.groupby(group_vars)[measure_var]
+                 .transform(min) == df[measure_var]]).reset_index(drop=True)
+                 
+    if deduplicate:
+        min_df = min_df[~min_df.duplicated(group_vars + [measure_var])]
+        
+    return min_df

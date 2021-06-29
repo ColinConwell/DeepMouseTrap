@@ -7,7 +7,7 @@ from sklearn.utils import check_X_y
 from sklearn.base import RegressorMixin
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.utils.extmath import safe_sparse_dot
-from sklearn.linear_model.base import LinearModel
+from sklearn.linear_model import LinearRegression
 
 from sklearn.model_selection import KFold, RepeatedKFold
 from sklearn.linear_model import ElasticNet
@@ -27,7 +27,7 @@ def compare_rdms(rdm1, rdm2, dist_type = 'pearson'):
 #### Representational Similarity Regression --------------------------------------------------
 
 #source: https://github.com/civisanalytics/civisml-extensions/blob/master/civismlext/nonnegative.py
-class NonNegativeLinearRegression(LinearModel, RegressorMixin):
+class NonNegativeLinearRegression(LinearRegression, RegressorMixin):
     """Non-negative least squares linear regression.
     Parameters
     ----------

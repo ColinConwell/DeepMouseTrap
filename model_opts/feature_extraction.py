@@ -1,10 +1,9 @@
-import os, sys, json
+import os, sys
+import warnings
 import numpy as np
-import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm.auto import tqdm as tqdm
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 
 from PIL import Image
 import torch.nn as nn
@@ -38,6 +37,15 @@ def convert_relu(parent):
             setattr(parent, child_name, nn.ReLU(inplace=False))
         elif len(list(child.children())) > 0:
             convert_relu(child)
+            
+def prep_model_for_extraction(model):
+    if model.training:
+        model = model.eval()
+    if not next(model.parameters()).is_cuda:
+        if torch.cuda.is_available():
+            model = model.cuda()
+
+    return(model)
 
 
 # Method 1: Flatten model; extract features by layer
@@ -60,6 +68,7 @@ def get_layer_names(layers):
     return layer_names
 
 def get_features_by_layer(model, target_layer, img_tensor):
+    model = prep_model_for_extraction()
     features = SaveFeatures(target_layer)
     model(img_tensor)
     features.close()
@@ -69,7 +78,7 @@ def get_features_by_layer(model, target_layer, img_tensor):
 
 def get_module_name(module, module_list):
     class_name = str(module.__class__).split(".")[-1].split("'")[0]
-    class_count = str(sum(class_name in key for key in list(module_list.keys())) + 1)
+    class_count = str(sum(class_name in module for module in module_list) + 1)
     
     return '-'.join([class_name, class_count])
     
@@ -81,7 +90,8 @@ def get_layer_names(model, output='dict'):
             layer_key = get_module_name(module, layer_name_dict)
             layer_name_dict[layer_key] = None
             layer_name_list.append(layer_key)
-            
+    
+    model.apply(convert_relu)
     model.apply(add_layer_to_list)
             
     if output=='list':
@@ -96,39 +106,66 @@ def get_feature_map_count(model):
     def count_module(module):
         if (not isinstance(module, nn.Sequential) and not isinstance(module, nn.ModuleList)):
             module_list.append(module)
-            
+    
+    model.apply(convert_relu)
     model.apply(count_module)
             
     return len(module_list)
     
-def remove_duplicate_feature_maps(feature_maps, return_matches = False):
-    matches = []
-    layer_names = list(feature_maps.keys())
-    for i in range(len(layer_names)):
-        for j in range(i+1,len(layer_names)):
-            layer1 = feature_maps[layer_names[i]].flatten()
-            layer2 = feature_maps[layer_names[j]].flatten()
-            if layer1.shape == layer2.shape and torch.all(torch.eq(layer1,layer2)):
-                if layer_names[j] not in matches:
-                    matches.append(layer_names[j])
+def remove_duplicate_feature_maps(feature_maps, method = 'hashkey', return_matches = False, use_tqdm = False):
+    matches, layer_names = [], list(feature_maps.keys())
+        
+    if method == 'iterative':
+        
+        target_iterator = tqdm(range(len(layer_names)), leave = False) if use_tqdm else range(len(layer_names))
+        
+        for i in target_iterator:
+            for j in range(i+1,len(layer_names)):
+                layer1 = feature_maps[layer_names[i]].flatten()
+                layer2 = feature_maps[layer_names[j]].flatten()
+                if layer1.shape == layer2.shape and torch.all(torch.eq(layer1,layer2)):
+                    if layer_names[j] not in matches:
+                        matches.append(layer_names[j])
 
-    for match in matches:
-        feature_maps.pop(match)
+        deduplicated_feature_maps = {key:value for (key,value) in feature_maps.items()
+                                         if key not in matches}
+        
+    if method == 'hashkey':
+        
+        target_iterator = tqdm(layer_names, leave = False) if use_tqdm else layer_names
+        layer_lengths = [len(tensor.flatten()) for tensor in feature_maps.values()]
+        random_tensor = torch.rand(np.array(layer_lengths).max())
+        
+        tensor_dict = defaultdict(lambda:[])
+        for layer_name in target_iterator:
+            target_tensor = feature_maps[layer_name].flatten()
+            tensor_dot = torch.dot(target_tensor, random_tensor[:len(target_tensor)])
+            tensor_hash = np.array(tensor_dot).tobytes()
+            tensor_dict[tensor_hash].append(layer_name)
+            
+        matches = [match for match in list(tensor_dict.values()) if len(match) > 1]
+        layers_to_keep = [tensor_dict[tensor_hash][0] for tensor_hash in tensor_dict]
+        
+        deduplicated_feature_maps = {key:value for (key,value) in feature_maps.items()
+                                         if key in layers_to_keep}
     
     if return_matches:
-        return(feature_maps, matches)
+        return(deduplicated_feature_maps, matches)
     
     if not return_matches:
-        return(feature_maps)
+        return(deduplicated_feature_maps)
     
-def get_feature_maps(model, inputs, layers_to_retain = None, use_tqdm = True, remove_duplicates = True):
+def get_feature_maps_(model, inputs):
+    model = prep_model_for_extraction(model)
+    
     def register_hook(module):
         def hook(module, input, output):
             module_name = get_module_name(module, feature_maps)
-            feature_maps[module_name] = output.cpu().detach()
-                
-        if (not isinstance(module, nn.Sequential) and not isinstance(module, nn.ModuleList)):
-            hooks.append(module.register_forward_hook(hook))
+            feature_maps[module_name] = output
+                    
+        if not isinstance(module, nn.Sequential): 
+            if not isinstance(module, nn.ModuleList):
+                hooks.append(module.register_forward_hook(hook))
             
     feature_maps = OrderedDict()
     hooks = []
@@ -140,19 +177,73 @@ def get_feature_maps(model, inputs, layers_to_retain = None, use_tqdm = True, re
     for hook in hooks:
         hook.remove()
         
-    if remove_duplicates == True:
-        remove_duplicate_feature_maps(feature_maps)
-        
-    if layers_to_retain is not None:
-        feature_maps = {map_key: map_item  for (map_key, map_item) in feature_maps.items() 
-                            if map_key in layers_to_retain}
-    
     return(feature_maps)
 
-def get_empty_feature_maps(model, input_size=(3,224,224), dataset_size=1, layers_to_retain = None, 
-        remove_duplicates = True, names_only=False):
-    inputs = torch.rand(1, *input_size).type(torch.FloatTensor)
-    inputs = inputs.cuda() if next(model.parameters()).is_cuda else inputs
+def get_feature_maps(model, inputs, layers_to_retain = None, remove_duplicates = True):
+    model = prep_model_for_extraction(model)
+    enforce_input_shape = True
+    
+    def register_hook(module):
+        def hook(module, input, output):
+            def process_output(output, module_name):
+                if layers_to_retain is None or module_name in layers_to_retain:
+                    if isinstance(output, torch.Tensor):
+                        outputs = output.cpu().detach()
+                        if enforce_input_shape:
+                            if outputs.shape[0] == inputs.shape[0]:
+                                feature_maps[module_name] = outputs
+                        if not enforce_input_shape:
+                            feature_maps[module_name] = outputs
+                            
+            module_name = get_module_name(module, feature_maps)
+            
+            if not any([isinstance(output, type_) for type_ in (tuple,list)]):
+                process_output(output, module_name)
+            
+            if any([isinstance(output, type_) for type_ in (tuple,list)]):
+                for output_i, output_ in enumerate(output):
+                    module_name_ = '-'.join([module_name, str(output_i+1)])
+                    process_output(output_, module_name_)
+                    
+        if (not isinstance(module, nn.Sequential) and not isinstance(module, nn.ModuleList)):
+            hooks.append(module.register_forward_hook(hook))
+            
+    feature_maps = OrderedDict()
+    hooks = []
+    
+    model.apply(convert_relu)
+    model.apply(register_hook)
+    with torch.no_grad():
+        model(inputs)
+
+    for hook in hooks:
+        hook.remove()
+        
+    if remove_duplicates == True:
+        feature_maps = remove_duplicate_feature_maps(feature_maps)
+        
+    return(feature_maps)
+
+def get_inputs_sample(inputs):
+    if isinstance(inputs, DataLoader):
+        input_sample = next(iter(inputs))[:3]
+    if isinstance(inputs, torch.Tensor):
+        input_sample = inputs[:3]
+        
+    return input_sample
+
+def get_empty_feature_maps(model, inputs = None, input_size=(3,224,224), dataset_size=3,
+        layers_to_retain = None, remove_duplicates = True, names_only=False):
+    
+    if inputs is not None:
+        inputs = get_inputs_sample(inputs)
+        
+    if inputs is None:
+        inputs = torch.rand(3, *input_size).type(torch.FloatTensor)
+        
+    if next(model.parameters()).is_cuda:
+        inputs = inputs.cuda()
+        
     empty_feature_maps = get_feature_maps(model, inputs, layers_to_retain, remove_duplicates)
     
     for map_key in empty_feature_maps:
@@ -164,41 +255,28 @@ def get_empty_feature_maps(model, input_size=(3,224,224), dataset_size=1, layers
     if names_only == False:
         return empty_feature_maps  
 
-def get_all_feature_maps(model, inputs, extract_by_stack=False, layers_to_retain=None, 
-                         use_tqdm = True, flatten=True, numpy=True, remove_duplicates=True):
+def get_all_feature_maps(model, inputs, layers_to_retain=None, remove_duplicates=True, 
+                         flatten=True, numpy=True, use_tqdm = True):
     
     if isinstance(inputs, DataLoader):
-        if not extract_by_stack:
-            input_size, dataset_size, start_index = inputs.dataset[0].shape, len(inputs.dataset), 0
-            feature_maps = get_empty_feature_maps(model, input_size, dataset_size, layers_to_retain)
-            for i, imgs in enumerate(tqdm(inputs)) if use_tqdm else enumerate(inputs):
-                imgs = imgs.cuda() if next(model.parameters()).is_cuda else imgs
-                batch_feature_map = get_feature_maps(model, imgs)
-                for layer in feature_maps.keys():
-                    feature_maps[layer][start_index:start_index+imgs.shape[0],...] = batch_feature_map[layer]
-                start_index += imgs.shape[0]
-                
-        if extract_by_stack:
-            if layers_to_retain is None:
-                feature_maps = get_empty_feature_maps(model)
-            if layers_to_retain is not None:
-                feature_maps = {layer: None for layer in layers_to_retain}
-            for i, imgs in enumerate(tqdm(inputs)) if use_tqdm else enumerate(inputs):
-                imgs = imgs.cuda() if next(model.parameters()).is_cuda else imgs
-                batch_feature_map = get_feature_maps(model, imgs)
-                for layer in feature_maps.keys():
-                    if feature_maps[layer] == None:
-                        feature_maps[layer] = batch_feature_map[layer]
-                    if feature_maps[layer] != None:
-                        feature_maps[layer] = torch.cat((feature_maps[layer], batch_feature_map[layer]))
+        input_size, dataset_size, start_index = inputs.dataset[0].shape, len(inputs.dataset), 0
+        feature_maps = get_empty_feature_maps(model, next(iter(inputs))[:3], input_size, 
+                                              dataset_size, layers_to_retain, remove_duplicates)
+        
+        for imgs in tqdm(inputs, desc = 'Processing Batch') if use_tqdm else inputs:
+            imgs = imgs.cuda() if next(model.parameters()).is_cuda else imgs
+            batch_feature_maps = get_feature_maps(model, imgs, layers_to_retain, remove_duplicates = False)
+            for map_i, map_key in enumerate(feature_maps):
+                feature_maps[map_key][start_index:start_index+imgs.shape[0],...] = batch_feature_maps[map_key]
+            start_index += imgs.shape[0]
                     
     if not isinstance(inputs, DataLoader):
         inputs = inputs.cuda() if next(model.parameters()).is_cuda else inputs
-        feature_maps = get_feature_maps(model, inputs, layers_to_retain, use_tqdm, remove_duplicates)
+        feature_maps = get_feature_maps(model, inputs, layers_to_retain, remove_duplicates)
     
     if remove_duplicates == True:
         feature_maps = remove_duplicate_feature_maps(feature_maps)
-    
+     
     if flatten == True:
         for map_key in feature_maps:
             incoming_map = feature_maps[map_key]
@@ -210,14 +288,15 @@ def get_all_feature_maps(model, inputs, extract_by_stack=False, layers_to_retain
             
     return feature_maps
 
-def get_feature_map_metadata(model, input_size=(3,224,224), remove_duplicates = True):
+def get_feature_map_metadata(model, input_size=(3,224,224), remove_duplicates = False):
+    model = prep_model_for_extraction(model)
+    
     def register_hook(module):
         def hook(module, input, output):
             module_name = get_module_name(module, metadata)
-            metadata[module_name] = {}
             feature_map = output.cpu().detach()
-            feature_maps[module_name] = feature_map
-            
+            map_data[module_name] = feature_map
+            metadata[module_name] = {}
             
             metadata[module_name]['feature_map_shape'] = feature_map.numpy().squeeze().shape
             metadata[module_name]['feature_count'] = feature_map.numpy().reshape(1, -1).shape[1]
@@ -238,7 +317,7 @@ def get_feature_map_metadata(model, input_size=(3,224,224), remove_duplicates = 
     if next(model.parameters()).is_cuda:
         inputs = inputs.cuda()
     
-    feature_maps = OrderedDict()
+    map_data = OrderedDict()
     metadata = OrderedDict()
     hooks = []
     
@@ -250,14 +329,14 @@ def get_feature_map_metadata(model, input_size=(3,224,224), remove_duplicates = 
         hook.remove()
         
     if remove_duplicates:
-        feature_maps = remove_duplicate_feature_maps(feature_maps)
-        metadata = {k:v for (k,v) in metadata.items() if k in feature_maps}
+        map_data = remove_duplicate_feature_maps(map_data)
+        metadata = {k:v for (k,v) in metadata.items() if k in map_data}
         
     return(metadata)  
         
 # Helpers: Dataloaders and functions for facilitating feature extraction
         
-class Array2DataLoader(Dataset):
+class Array2DataSet(Dataset):
     def __init__(self, img_array, image_transforms=None):
         self.transforms = image_transforms
         if isinstance(img_array, np.ndarray):
@@ -297,6 +376,16 @@ def chunk_list(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
         
+def reverse_typical_transforms(img_array):
+    if torch.is_tensor(img_array):
+        img_array = img_array.numpy()
+    if len(img_array.shape) == 3:
+        img_array = img_array.transpose((1,2,0))
+    if len(img_array.shape) == 4:
+        img_array = img_array.transpose((0,2,3,1))
+    
+    return(img_array)
+
 def reverse_imagenet_transforms(img_array):
     if torch.is_tensor(img_array):
         img_array = img_array.numpy()
@@ -323,14 +412,19 @@ def numpy_to_pil(img_array):
     
     return (img_array)
 
-def get_dataloader_sample(dataloader, nrow = 8, title=None):
-    image_grid = torchvision.utils.make_grid(next(iter(dataloader)), nrow = nrow)
-    image_grid = image_grid.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    image_grid = std * image_grid + mean
-    image_grid = np.clip(image_grid, 0, 1)
+from torchvision.utils import make_grid
+
+def get_dataloader_sample(dataloader, nrow = 5, figsize = (5,5), title=None,  
+                          reverse_transforms = reverse_imagenet_transforms):
+    
+    image_batch = next(iter(dataloader))
+    batch_size = image_batch.shape[0]
+    image_grid = make_grid(image_batch, nrow = batch_size // nrow)
+    if reverse_transforms:
+        image_grid = reverse_transforms(image_grid)
+    plt.figure(figsize=figsize)
     plt.imshow(image_grid)
+    plt.axis('off')
     if title is not None:
         plt.title(title)
     plt.pause(0.001)
