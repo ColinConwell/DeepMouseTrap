@@ -41,6 +41,28 @@ def get_feature_map_filepaths(model_string, feature_map_names, output_dir):
     return {feature_map_name: os.path.join(output_dir, feature_map_name + '.npy')
                                 for feature_map_name in feature_map_names}
 
+#source: stackoverflow.com/questions/26774892
+def recursive_delete_if_empty(path):
+    if not os.path.isdir(path):
+        return False
+    
+    recurse_list = [recursive_delete_if_empty(os.path.join(path, filename))
+                    for filename in os.listdir(path)]
+    
+    if all(recurse_list):
+        os.rmdir(path)
+        return True
+    if not all(recurse_list):
+        return False
+
+def delete_saved_output(output_filepaths, output_dir = None, remove_empty_output_dir = False):
+    for file_path in output_filepaths:
+        os.remove(output_filepaths[file_path])
+    if output_dir is not None and remove_empty_output_dir:
+        output_dir = output_dir.split('/')[0]
+        recursive_delete_if_empty(output_dir)
+        
+
 def torch_corrcoef(m):
     #calculate the covariance matrix
     m_exp = torch.mean(m, dim=1)
@@ -55,8 +77,10 @@ def torch_corrcoef(m):
     cor_m = torch.clamp(cor_m, -1.0, 1.0)
     return cor_m
 
-def srp_extraction(model_string, model = None, feature_maps = None, model_inputs=None, output_dir='./srp_arrays', 
-                   n_projections=None, eps=0.1, seed = 0, keep_feature_maps = True):
+def srp_extraction(model_string, model = None, feature_maps = None, model_inputs=None, 
+                   n_projections = None, upsampling = True, eps=0.1, seed = 0, 
+                   output_dir='./srp_arrays', delete_saved_outputs = True,
+                   keep_original_feature_maps = True, verbose = True):
     
     check_model(model_string, model)
     check_reduction_inputs(feature_maps, model_inputs)
@@ -72,11 +96,13 @@ def srp_extraction(model_string, model = None, feature_maps = None, model_inputs
         if feature_maps is not None:
             n_samples = next(iter(feature_maps.values())).shape[0]
         n_projections = johnson_lindenstrauss_min_dim(n_samples, eps=eps)
-        
-    print('Computing {} SRPs for {} on {}...'.format(n_projections, model_string, device_name))
+    
+    if verbose:
+        print('Computing {} SRPs for {} on {}...'.format(n_projections, model_string, device_name))
 
     output_dir = os.path.join(output_dir, str(n_projections) + '_' + str(seed), model_string)
-    if not os.path.exists(output_dir):
+    output_dir_exists = os.path.exists(output_dir)
+    if not output_dir_exists:
         os.makedirs(output_dir)
         
     if feature_maps is None:
@@ -96,25 +122,30 @@ def srp_extraction(model_string, model = None, feature_maps = None, model_inputs
         output_filepaths = get_feature_map_filepaths(model_string, feature_map_names, output_dir)
         
     srp_feature_maps = {}
-    for feature_map_name in tqdm(feature_map_names):
+    for feature_map_name in tqdm(feature_map_names, desc = 'SRP Extraction (Layer)'):
         output_filepath = output_filepaths[feature_map_name]
         if not os.path.exists(output_filepath):
             feature_map = feature_maps[feature_map_name]
-            if feature_map.shape[1] >= n_projections:
+            if feature_map.shape[1] <= n_projections and not upsampling:
+                srp_feature_maps[feature_map_name] = feature_map
+            if feature_map.shape[1] >= n_projections or upsampling:
                 srp = SparseRandomProjection(n_projections, random_state=seed)
                 srp_feature_maps[feature_map_name] = srp.fit_transform(feature_map) 
-            if feature_map.shape[1] <= n_projections:
-                srp_feature_maps[feature_map_name] = feature_map
             np.save(output_filepath, srp_feature_maps[feature_map_name])
         if os.path.exists(output_filepath):
             srp_feature_maps[feature_map_name] = np.load(output_filepath, allow_pickle=True)
-        if not keep_feature_maps:
+        if not keep_original_feature_maps:
                 feature_maps.pop(feature_map_name)
+                
+    if delete_saved_outputs:
+        delete_saved_output(output_filepaths, output_dir, remove_empty_output_dir = True)
             
     return(srp_feature_maps)
 
-def rdm_extraction(model_string, model = None, feature_maps = None, model_inputs = None, output_dir='./rdm_arrays', 
-                   use_torch_corr = False, append_suffix = False, verbose=False):
+def rdm_extraction(model_string, model = None, feature_maps = None, model_inputs = None,
+                   use_torch_corr = False, append_suffix = False,
+                   output_dir='./rdm_arrays', delete_saved_outputs = True,
+                   keep_original_feature_maps = True, verbose = True):
     
     check_model(model_string, model)
     check_reduction_inputs(feature_maps, model_inputs)
@@ -151,19 +182,23 @@ def rdm_extraction(model_string, model = None, feature_maps = None, model_inputs
                 model_rdms[model_layer] = model_rdm.numpy()
             if not use_torch_corr:
                 model_rdms[model_layer] = np.corrcoef(feature_maps[model_layer])
+            if not keep_original_feature_maps:
+                feature_maps.pop(feature_map)
         with open(output_file, 'wb') as file:
             pickle.dump(model_rdms, file)
             
     return(model_rdms)
 
-def pca_extraction(model_string, model = None, feature_maps = None, model_inputs=None, output_dir='./pca_arrays', 
-                   n_components=None, use_imagenet_pca = True, imagenet_sample_path = None, keep_feature_maps = True):
+def pca_extraction(model_string, model = None, feature_maps = None, model_inputs=None, 
+                   n_components=None, use_imagenet_pca = True, imagenet_path = None, 
+                   output_dir='./pca_arrays', delete_saved_outputs = True,
+                   keep_original_feature_maps = True, verbose = True):
     
     check_model(model_string, model)
     check_reduction_inputs(feature_maps, model_inputs)
     
-    if use_imagenet_pca == True and imagenet_sample_path is None:
-        raise ValueError('use_imagenet_pca selected, but imagenet_sample_path not specified.')
+    if use_imagenet_pca == True and imagenet_path is None:
+        raise ValueError('use_imagenet_pca selected, but imagenet_path not specified.')
     
     if feature_maps is None:
         if isinstance(model_inputs, torch.Tensor):
@@ -184,8 +219,9 @@ def pca_extraction(model_string, model = None, feature_maps = None, model_inputs
             n_components = 1000
         if not use_imagenet_pca:
             n_components = n_samples
-        
-    device_name = 'CPU' if not torch.cuda.is_available() else torch.cuda.get_device_name()
+    
+    if verbose:
+        device_name = 'CPU' if not torch.cuda.is_available() else torch.cuda.get_device_name()
     
     pca_type = 'imagenet_1000' if use_imagenet_pca else 'stimulus_direct'
     pca_printout = '1000 ImageNet PCs' if use_imagenet_pca else 'up to {} Stimulus PCs'.format(n_components) 
@@ -214,7 +250,7 @@ def pca_extraction(model_string, model = None, feature_maps = None, model_inputs
         output_filepaths = get_feature_map_filepaths(model_string, feature_map_names, output_dir)
         
     if not all([os.path.exists(file) for file in output_filepaths.values()]) and use_imagenet_pca:
-        imagenet_images, imagenet_transforms = np.load(imagenet_sample_path), get_image_transforms()['imagenet']
+        imagenet_images, imagenet_transforms = np.load(imagenet_path), get_image_transforms()['imagenet']
         imagenet_loader = DataLoader(Array2DataSet(imagenet_images, imagenet_transforms), batch_size=64)
 
         print('Now extracting feature maps for imagenet_sample...')
@@ -239,7 +275,7 @@ def pca_extraction(model_string, model = None, feature_maps = None, model_inputs
             np.save(output_filepath, pca_feature_maps[feature_map_name])
         if os.path.exists(output_filepath):
             pca_feature_maps[feature_map_name] = np.load(output_filepath, allow_pickle=True)
-        if not keep_feature_maps:
+        if not keep_original_feature_maps:
             feature_maps.pop(feature_map_name)
             if use_imagenet_pca:
                 imagenet_feature_maps.pop(feature_map_name)

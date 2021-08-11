@@ -93,7 +93,7 @@ jigsaw,Jigsaw,taskonomy,taskonomy,taskonomy,Putting scrambled image pieces back 
 keypoints2d,2D Keypoints,taskonomy,taskonomy,taskonomy,Keypoint estimation from RGB-only (texture features).,2D,Convolutional,taskonomy,github.com/alexsax/midlevel-reps/tree/visualpriors
 keypoints3d,3D Keypoints,taskonomy,taskonomy,taskonomy,3D Keypoint estimation from underlying scene 3D.,3D,Convolutional,taskonomy,github.com/alexsax/midlevel-reps/tree/visualpriors
 nonfixated_pose,Camera Pose (Nonfixated),taskonomy,taskonomy,taskonomy,Relative camera pose with distinct optical centers.,Geometric,Convolutional,taskonomy,github.com/alexsax/midlevel-reps/tree/visualpriors
-normal,Surface Normals,taskonomy,taskonomy,taskonomy,Pixel-wise surface normals.,Other,Convolutional,taskonomy,github.com/alexsax/midlevel-reps/tree/visualpriors
+normal,Surface Normals,taskonomy,taskonomy,taskonomy,Pixel-wise surface normals.,3D,Convolutional,taskonomy,github.com/alexsax/midlevel-reps/tree/visualpriors
 point_matching,Point Matching,taskonomy,taskonomy,taskonomy,Classifying if centers of two images match or not.,Geometric,Convolutional,taskonomy,github.com/alexsax/midlevel-reps/tree/visualpriors
 reshading,Reshading,taskonomy,taskonomy,taskonomy,Reshading with new lighting placed at camera location.,3D,Convolutional,taskonomy,github.com/alexsax/midlevel-reps/tree/visualpriors
 room_layout,Room Layout,taskonomy,taskonomy,taskonomy,Orientation and aspect ratio of cubic room layout.,Geometric,Convolutional,taskonomy,github.com/alexsax/midlevel-reps/tree/visualpriors
