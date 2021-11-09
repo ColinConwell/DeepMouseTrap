@@ -1,1 +1,1 @@
-This is the place where the website will be made.
+This site is currently under instruction. For now, please refer to the Github repo associated with this site.
