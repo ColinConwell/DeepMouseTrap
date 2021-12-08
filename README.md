@@ -4,14 +4,13 @@ This is the repository for the ongoing deep neural mouse modeling project, an at
 
 An accompanying Google Colab notebook (bit.ly/Neural-Cheese) contains a brief tutorial on the use of many parts of this code, including the parsing of the neurophysiology data, deep net feature extraction, and deep net modeling of the neurophysiology data.
 
-A manuscript (recently accepted to NeurIPS2021) that uses these methods may be found [here](https://www.biorxiv.org/content/biorxiv/early/2021/06/18/2021.06.18.448431.full.pdf).
+An article (appearing in NeurIPS2021) that uses these methods may be found [here](https://papers.nips.cc/paper/2021/file/2c29d89cc56cdb191c60db2f0bae796b-Paper.pdf).
 
 ```bibtex
-@article{conwell2021neural,
+@inproceedings{conwell2021neural,
   title={Neural Regression, Representational Similarity, Model Zoology \& Neural Taskonomy at Scale in Rodent Visual Cortex},
-  author={Conwell, Colin and Mayo, David and Katz, Boris and Buice, Michael A and Alvarez, George A and Barbu, Andrei},
-  journal={bioRxiv},
-  year={2021},
-  publisher={Cold Spring Harbor Laboratory}
+  author={Conwell, Colin and Mayo, David and Barbu, Andrei and Buice, Michael A and Alvarez, George A and Katz, Boris},
+  booktitle={Thirty-Fifth Conference on Neural Information Processing Systems},
+  year={2021}
 }
 ```
