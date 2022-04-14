@@ -9,10 +9,11 @@ An accompanying Google Colab notebook ([bit.ly/Neural-Cheese](https://bit.ly/Neu
 An article (appearing in NeurIPS2021) that uses these methods may be found [here](https://papers.nips.cc/paper/2021/file/2c29d89cc56cdb191c60db2f0bae796b-Paper.pdf).
 
 ```bibtex
-@inproceedings{conwell2021neural,
+@article{conwell2021neural,
   title={Neural Regression, Representational Similarity, Model Zoology \& Neural Taskonomy at Scale in Rodent Visual Cortex},
-  author={Conwell, Colin and Mayo, David and Barbu, Andrei and Buice, Michael A and Alvarez, George A and Katz, Boris},
-  booktitle={Thirty-Fifth Conference on Neural Information Processing Systems},
+  author={Conwell, Colin and Mayo, David and Barbu, Andrei and Buice, Michael and Alvarez, George and Katz, Boris},
+  journal={Advances in Neural Information Processing Systems},
+  volume={34},
   year={2021}
 }
 ```
