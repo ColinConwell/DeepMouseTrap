@@ -10,7 +10,7 @@ neural_data_dir = '../neural_data'
 model_opts_dir = '../model_opts'
 
 sys.path.append(neural_data_dir)
-from compute_neural_rdms import *
+from neural_data import *
 
 sys.path.append(model_opts_dir)
 from feature_extraction import *
